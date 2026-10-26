@@ -56,6 +56,24 @@ public class ServicioCatalogo {
     @Column(name = "ACTIVO", nullable = false)
     private Boolean activo = true;
 
+    @Column(name = "PESO_MAXIMO_KG", precision = 6, scale = 2)
+    private BigDecimal pesoMaximoKg;
+
+    @Column(name = "LADO_MAXIMO_CM")
+    private Integer ladoMaximoCm;
+
+    @Column(name = "VOLUMEN_MAXIMO_CM3")
+    private Long volumenMaximoCm3;
+
+    @Column(name = "DIVISOR_VOLUMETRICO", nullable = false)
+    private Integer divisorVolumetrico = 4000;
+
+    @Column(name = "PLAZO_MIN_DIAS")
+    private Integer plazoMinDias;
+
+    @Column(name = "PLAZO_MAX_DIAS")
+    private Integer plazoMaxDias;
+
     @Column(name = "FECHA_CREACION", nullable = false, updatable = false)
     private LocalDateTime fechaCreacion;
 
@@ -76,6 +94,7 @@ public class ServicioCatalogo {
         this.capacidadMaximaDiaria = capacidadMaximaDiaria;
         this.capacidadDisponible = capacidadMaximaDiaria;
         this.activo = true;
+        this.divisorVolumetrico = 4000;
     }
 
     @PrePersist
@@ -87,6 +106,9 @@ public class ServicioCatalogo {
         }
         if (this.capacidadDisponible == null) {
             this.capacidadDisponible = this.capacidadMaximaDiaria;
+        }
+        if (this.divisorVolumetrico == null) {
+            this.divisorVolumetrico = 4000;
         }
     }
 
@@ -175,6 +197,54 @@ public class ServicioCatalogo {
 
     public void setActivo(Boolean activo) {
         this.activo = activo;
+    }
+
+    public BigDecimal getPesoMaximoKg() {
+        return pesoMaximoKg;
+    }
+
+    public void setPesoMaximoKg(BigDecimal pesoMaximoKg) {
+        this.pesoMaximoKg = pesoMaximoKg;
+    }
+
+    public Integer getLadoMaximoCm() {
+        return ladoMaximoCm;
+    }
+
+    public void setLadoMaximoCm(Integer ladoMaximoCm) {
+        this.ladoMaximoCm = ladoMaximoCm;
+    }
+
+    public Long getVolumenMaximoCm3() {
+        return volumenMaximoCm3;
+    }
+
+    public void setVolumenMaximoCm3(Long volumenMaximoCm3) {
+        this.volumenMaximoCm3 = volumenMaximoCm3;
+    }
+
+    public Integer getDivisorVolumetrico() {
+        return divisorVolumetrico;
+    }
+
+    public void setDivisorVolumetrico(Integer divisorVolumetrico) {
+        this.divisorVolumetrico = divisorVolumetrico;
+    }
+
+    public Integer getPlazoMinDias() {
+        return plazoMinDias;
+    }
+
+    public void setPlazoMinDias(Integer plazoMinDias) {
+        this.plazoMinDias = plazoMinDias;
+    }
+
+    public Integer getPlazoMaxDias() {
+        return plazoMaxDias;
+    }
+
+    public void setPlazoMaxDias(Integer plazoMaxDias) {
+        this.plazoMaxDias = plazoMaxDias;
     }
 
     public LocalDateTime getFechaCreacion() {

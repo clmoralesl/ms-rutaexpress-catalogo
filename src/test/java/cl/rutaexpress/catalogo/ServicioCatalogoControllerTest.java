@@ -26,6 +26,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("test")
 class ServicioCatalogoControllerTest {
 
+    private static final String SECRETO_TEST = "test-secreto-interno-catalogo-seguro-32caracteres";
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -67,7 +69,7 @@ class ServicioCatalogoControllerTest {
     }
 
     @Test
-    @DisplayName("GET /api/publico/salud - Debe responder 200 OK con estado UP")
+    @DisplayName("GET /api/publico/salud - Debe responder 200 OK con estado UP sin cabecera de secreto")
     void testSaludPublica() throws Exception {
         mockMvc.perform(get("/api/publico/salud"))
                 .andExpect(status().isOk())
@@ -76,7 +78,7 @@ class ServicioCatalogoControllerTest {
     }
 
     @Test
-    @DisplayName("GET /actuator/health - Debe responder 200 OK con status UP")
+    @DisplayName("GET /actuator/health - Debe responder 200 OK con status UP sin cabecera de secreto")
     void testSaludActuator() throws Exception {
         mockMvc.perform(get("/actuator/health"))
                 .andExpect(status().isOk())
@@ -85,9 +87,10 @@ class ServicioCatalogoControllerTest {
     }
 
     @Test
-    @DisplayName("GET /api/catalogo/servicios - Debe retornar lista de servicios activos")
+    @DisplayName("GET /api/catalogo/servicios - Debe retornar lista de servicios activos con cabecera interna")
     void testListarServicios() throws Exception {
-        mockMvc.perform(get("/api/catalogo/servicios"))
+        mockMvc.perform(get("/api/catalogo/servicios")
+                        .header("X-Servicio-Interno", SECRETO_TEST))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)))
                 .andExpect(jsonPath("$[0].codigo").value("EXPRESS"))
@@ -95,9 +98,10 @@ class ServicioCatalogoControllerTest {
     }
 
     @Test
-    @DisplayName("GET /api/catalogo/servicios/{id} - Debe retornar servicio por ID")
+    @DisplayName("GET /api/catalogo/servicios/{id} - Debe retornar servicio por ID con cabecera interna")
     void testObtenerPorId() throws Exception {
-        mockMvc.perform(get("/api/catalogo/servicios/" + servicioExpress.getId()))
+        mockMvc.perform(get("/api/catalogo/servicios/" + servicioExpress.getId())
+                        .header("X-Servicio-Interno", SECRETO_TEST))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.codigo").value("EXPRESS"))
                 .andExpect(jsonPath("$.nombre").value("Envio Express 24 Horas"));
@@ -117,6 +121,7 @@ class ServicioCatalogoControllerTest {
         );
 
         mockMvc.perform(post("/api/catalogo/servicios")
+                        .header("X-Servicio-Interno", SECRETO_TEST)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -138,6 +143,7 @@ class ServicioCatalogoControllerTest {
         );
 
         mockMvc.perform(put("/api/catalogo/servicios/" + servicioExpress.getId())
+                        .header("X-Servicio-Interno", SECRETO_TEST)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -148,7 +154,8 @@ class ServicioCatalogoControllerTest {
     @Test
     @DisplayName("PATCH /api/catalogo/servicios/{id}/descontar-capacidad - Reduce cupo exitosamente")
     void testDescontarCapacidadExitoso() throws Exception {
-        mockMvc.perform(patch("/api/catalogo/servicios/" + servicioExpress.getId() + "/descontar-capacidad"))
+        mockMvc.perform(patch("/api/catalogo/servicios/" + servicioExpress.getId() + "/descontar-capacidad")
+                        .header("X-Servicio-Interno", SECRETO_TEST))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.capacidadDisponible").value(49));
     }
@@ -156,7 +163,8 @@ class ServicioCatalogoControllerTest {
     @Test
     @DisplayName("PATCH /api/catalogo/servicios/{id}/descontar-capacidad - Rechaza con 409 Conflict cuando capacidad es 0")
     void testDescontarCapacidadAgotada() throws Exception {
-        mockMvc.perform(patch("/api/catalogo/servicios/" + servicioAgotado.getId() + "/descontar-capacidad"))
+        mockMvc.perform(patch("/api/catalogo/servicios/" + servicioAgotado.getId() + "/descontar-capacidad")
+                        .header("X-Servicio-Interno", SECRETO_TEST))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.status").value(409))
                 .andExpect(jsonPath("$.error").value("CONFLICTO_CAPACIDAD"))
@@ -166,7 +174,8 @@ class ServicioCatalogoControllerTest {
     @Test
     @DisplayName("PATCH /api/catalogo/servicios/{id}/descontar-capacidad - Retorna 404 si el servicio no existe")
     void testDescontarCapacidadNoEncontrado() throws Exception {
-        mockMvc.perform(patch("/api/catalogo/servicios/99999/descontar-capacidad"))
+        mockMvc.perform(patch("/api/catalogo/servicios/99999/descontar-capacidad")
+                        .header("X-Servicio-Interno", SECRETO_TEST))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.status").value(404));
     }
